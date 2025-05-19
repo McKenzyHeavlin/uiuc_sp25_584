@@ -1,0 +1,102 @@
+<hyxml type="Model">
+  <automaton name="default_automaton">
+    <variable name="l" scope="LOCAL_DATA" type="Real" />
+    <variable name="iv" scope="LOCAL_DATA" type="Bool" />
+    <variable name="ov" scope="LOCAL_DATA" type="Bool" />
+    <variable name="i_flow" scope="LOCAL_DATA" type="Real" />
+    <variable name="o_flow" scope="LOCAL_DATA" type="Real" />
+    <variable name="avg_flow" scope="LOCAL_DATA" type="Real" />
+    <variable name="t" scope="LOCAL_DATA" type="Real" />
+    <mode id="0" initial="True" name="filling">
+      <dai equation="l_dot=  iv*i_flow - ov*o_flow" />
+      <dai equation="iv_dot = 0" />
+      <dai equation="ov_dot = 0" />
+      <dai equation="i_flow_dot = 0" />
+      <dai equation="o_flow_dot = 0" />
+      <dai equation="avg_flow_dot = (i_flow - avg_flow) / t" />
+      <dai equation="t_dot = 1" />
+      <invariant equation="l &lt;= 1000" />
+    </mode>
+    <mode id="1" initial="False" name="emptying">
+      <dai equation="l_dot = iv*i_flow - ov*o_flow" />
+      <dai equation="iv_dot = 0" />
+      <dai equation="ov_dot = 0" />
+      <dai equation="i_flow_dot = 0" />
+      <dai equation="o_flow_dot = 0" />
+      <dai equation="avg_flow_dot =(-o_flow - avg_flow) / t" />
+      <dai equation="t_dot = 1" />
+      <invariant equation="l &gt;= 0" />
+    </mode>
+    <mode id="2" initial="False" name="idle">
+      <dai equation="l_dot = 0" />
+      <dai equation="iv_dot = 0" />
+      <dai equation="ov_dot = 0" />
+      <dai equation="i_flow_dot = 0" />
+      <dai equation="o_flow_dot = 0" />
+      <dai equation="avg_flow_dot = 0" />
+      <dai equation="t_dot = 1" />
+      <invariant equation="iv == 0" />
+      <invariant equation="ov == 0" />
+    </mode>
+    <transition destination="1" id="0" source="0">
+      <guard equation="l &gt;= 950" />
+      <action equation="iv = 0" />
+      <action equation="ov = 1" />
+      <action equation="i_flow = 0" />
+      <action equation="o_flow = 50" />
+      <action equation="t = 0.1" />
+    </transition>
+    <transition destination="0" id="1" source="1">
+      <guard equation="l &lt;= 20" />
+      <action equation="iv = 1" />
+      <action equation="ov = 0" />
+      <action equation="i_flow = 50" />
+      <action equation="o_flow = 0" />
+      <action equation="t = 0.1" />
+    </transition>
+    <transition destination="2" id="2" source="0">
+      <guard equation="t &gt; 15.0" />
+      <action equation="iv = 0" />
+      <action equation="ov = 0" />
+      <action equation="i_flow = 0" />
+      <action equation="o_flow = 0 " />
+      <action equation="t = 0.1" />
+    </transition>
+    <transition destination="0" id="3" source="2">
+      <guard equation="t &gt; 15.0 &amp;&amp; l &lt;= 950" />
+      <action equation="iv = 1" />
+      <action equation="ov = 0" />
+      <action equation="i_flow = 50" />
+      <action equation="o_flow = 0" />
+      <action equation="t = 0.1" />
+    </transition>
+    <transition destination="2" id="4" source="1">
+      <guard equation="t &gt; 15.0" />
+      <action equation="iv = 0" />
+      <action equation="ov = 0" />
+      <action equation="i_flow = 0" />
+      <action equation="o_flow = 0" />
+      <action equation="t = 0.1" />
+    </transition>
+    <transition destination="1" id="5" source="2">
+      <guard equation="t &gt; 15.0 &amp;&amp; l &gt;= 950" />
+      <action equation="iv = 0" />
+      <action equation="ov = 1" />
+      <action equation="i_flow = 0" />
+      <action equation="o_flow = 50" />
+      <action equation="t = 0.1" />
+    </transition>
+  </automaton>
+  <property initialSet="filling: l == 50 &amp;&amp; iv == 1 &amp;&amp; ov == 0 &amp;&amp; i_flow == 50 &amp;&amp; o_flow == 0 &amp;&amp; avg_flow == 1 &amp;&amp; t == 0.1" name="level_w_valves" type="Safety" unsafeSet="l &gt; 1000">
+    <parameters kvalue="0.0" timehorizon="100.0" timestep="0.1" />
+  </property>
+  <property initialSet="filling: l == 50 &amp;&amp; iv == 1 &amp;&amp; ov == 0 &amp;&amp; i_flow == 50 &amp;&amp; o_flow == 0 &amp;&amp; avg_flow == 1 &amp;&amp; t == 0.1" name="valve_states" type="Safety" unsafeSet="iv == 1 &amp;&amp; ov == 1">
+    <parameters kvalue="0.0" timehorizon="100.0" timestep="0.1" />
+  </property>
+  <property initialSet="filling: l == 50 &amp;&amp; iv == 1 &amp;&amp; ov == 0 &amp;&amp; i_flow == 50 &amp;&amp; o_flow == 0 &amp;&amp; avg_flow == 1 &amp;&amp; t == 0.1" name="flow_rates" type="Safety" unsafeSet="avg_flow - i_flow &gt; 0">
+    <parameters kvalue="0.0" timehorizon="100.0" timestep="0.1" />
+  </property>
+  <property initialSet="filling: l == 50 &amp;&amp; iv == 1 &amp;&amp; ov == 0 &amp;&amp; i_flow == 50 &amp;&amp; o_flow == 0 &amp;&amp; avg_flow == 1 &amp;&amp; t == 0.1" name="valve_timing" type="Safety" unsafeSet="t &gt; 20.0">
+    <parameters kvalue="0.0" timehorizon="200.0" timestep="0.1" />
+  </property>
+</hyxml>

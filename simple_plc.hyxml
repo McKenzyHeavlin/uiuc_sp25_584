@@ -1,0 +1,22 @@
+<hyxml type="Model">
+  <automaton name="default_automaton">
+    <variable name="l" scope="LOCAL_DATA" type="Real" />
+    <mode id="0" initial="True" name="filling">
+      <dai equation="l_dot=  0.1*l" />
+      <invariant equation="l &lt;= 1000" />
+    </mode>
+    <mode id="1" initial="False" name="emptying">
+      <dai equation="l_dot= -0.5*l" />
+      <invariant equation="l &gt;= 0" />
+    </mode>
+    <transition destination="1" id="0" source="0">
+      <guard equation="l &gt;= 950" />
+    </transition>
+    <transition destination="0" id="1" source="1">
+      <guard equation="l &lt;= 20" />
+    </transition>
+  </automaton>
+  <property initialSet="filling: l == 50" name="no_simultaneous_valves" type="Safety" unsafeSet="l&gt;1000">
+    <parameters kvalue="0.0" timehorizon="20.0" timestep="0.1" />
+  </property>
+</hyxml>
